@@ -1,0 +1,38 @@
+# Системные файлы операционной системы
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+.vscode/
+.idea/
+
+# Файлы конфигурации пользователей
+*.user
+*.rsuser
+*.suo
+*.userprefs
+
+# Секретные файлы и ключи
+secrets.json
+
+# Лог-файлы
+*.log
+
+# Кэш
+*.cache
+*.temp
+
+# Конфигурационные файлы для IDE
+*.csproj.user
+.vscode/
+.idea/
+
+# Файлы миграций Entity Framework
+Migrations/
+
+# База данных SQLite
+*.db
+*.db-journal
+
+# Теги и метаданные
+*.sln.docstates
