@@ -1,20 +1,30 @@
-// Program.cs
 using Microsoft.EntityFrameworkCore;
+using CsProductCatalogueAPI.Data;
+using CsProductCatalogueAPI.Repositories;
+using CsProductCatalogueAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавление контекста базы данных
+// Настройка контекста базы данных
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Добавление сервисов для контроллеров и Swagger
+// Регистрация репозиториев
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+
+// Регистрация сервисов
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductCategoryService>();
+
+// Настройка контроллеров и Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Настройка для использования Swagger
+// Конфигурация приложения
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

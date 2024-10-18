@@ -1,110 +1,65 @@
+using CsProductCatalogueAPI.DTOs;
+using CsProductCatalogueAPI.Models;
+using CsProductCatalogueAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class ProductsController : ControllerBase
+namespace CsProductCatalogueAPI.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProductsController(ApplicationDbContext context)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ProductsController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly IProductRepository _productRepository;
 
-    // GET: api/Products
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
-    {
-        return await _context.Products.Include(p => p.Category).ToListAsync();
-    }
-
-    // GET: api/Products/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Product>> GetProduct(int id)
-    {
-        var product = await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
-
-        if (product == null)
+        public ProductsController(IProductRepository productRepository)
         {
-            return NotFound(new { message = $"Товар с ID = {id} не найден." });
+            _productRepository = productRepository;
         }
 
-        return product;
-    }
-
-    // POST: api/Products
-    [HttpPost]
-    public async Task<ActionResult<Product>> PostProduct(Product product)
-    {
-        if (!ModelState.IsValid)
+        [HttpPost]
+        public async Task<IActionResult> AddProduct(ProductDto productDto)
         {
-            return BadRequest(ModelState);
+            var product = ConvertToModel(productDto);
+            await _productRepository.AddProductAsync(product);
+            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
         }
 
-        var categoryExists = await _context.ProductCategories.AnyAsync(c => c.Id == product.CategoryId);
-        if (!categoryExists)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts()
         {
-            return NotFound(new { message = "Указанная категория не найдена." });
+            var products = await _productRepository.GetAllProductsAsync();
+            return Ok(products); // Возможно, вам нужно будет преобразовать к DTO
         }
 
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
-    }
-
-    // PUT: api/Products/id
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutProduct(int id, Product product)
-    {
-        if (id != product.Id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
-            return BadRequest(new { message = "ID в пути и теле запроса не совпадают." });
+            var product = await _productRepository.GetProductByIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(ConvertToDto(product)); // Добавить метод ConvertToDto
         }
 
-        if (!ModelState.IsValid)
+        private Product ConvertToModel(ProductDto dto)
         {
-            return BadRequest(ModelState);
-        }
-
-        var categoryExists = await _context.ProductCategories.AnyAsync(c => c.Id == product.CategoryId);
-        if (!categoryExists)
-        {
-            return NotFound(new { message = "Указанная категория не найдена." });
-        }
-
-        _context.Entry(product).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_context.Products.Any(e => e.Id == id))
+            return new Product
             {
-                return NotFound(new { message = $"Товар с ID = {id} не найден." });
-            }
-            throw;
+                Id = dto.Id,
+                Name = dto.Name,
+                Price = dto.Price,
+            };
         }
 
-        return NoContent();
-    }
-
-    // DELETE: api/Products/id
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteProduct(int id)
-    {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null)
+        private ProductDto ConvertToDto(Product product)
         {
-            return NotFound(new { message = $"Товар с ID = {id} не найден." });
+            return new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+            };
         }
-
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
     }
 }
+

@@ -1,98 +1,64 @@
+using CsProductCatalogueAPI.DTOs;
+using CsProductCatalogueAPI.Models;
+using CsProductCatalogueAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class ProductCategoriesController : ControllerBase
+namespace CsProductCatalogueAPI.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProductCategoriesController(ApplicationDbContext context)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ProductCategoriesController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly IProductCategoryRepository _categoryRepository;
 
-    // GET: api/ProductCategories
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductCategory>>> GetProductCategories()
-    {
-        return await _context.ProductCategories.ToListAsync();
-    }
-
-    // GET: api/ProductCategories/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ProductCategory>> GetProductCategory(int id)
-    {
-        var category = await _context.ProductCategories.FindAsync(id);
-
-        if (category == null)
+        public ProductCategoriesController(IProductCategoryRepository categoryRepository)
         {
-            return NotFound(new { message = $"Категория с ID = {id} не найдена." });
+            _categoryRepository = categoryRepository;
         }
 
-        return category;
-    }
-
-    // POST: api/ProductCategories
-    [HttpPost]
-    public async Task<ActionResult<ProductCategory>> PostProductCategory(ProductCategory category)
-    {
-        if (!ModelState.IsValid)
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(ProductCategoryDto categoryDto)
         {
-            return BadRequest(ModelState);
+            var category = ConvertToModel(categoryDto);
+            await _categoryRepository.AddCategoryAsync(category);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
         }
 
-        _context.ProductCategories.Add(category);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetProductCategory), new { id = category.Id }, category);
-    }
-
-    // PUT: api/ProductCategories/id
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutProductCategory(int id, ProductCategory category)
-    {
-        if (id != category.Id)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductCategoryDto>>> GetAllCategories()
         {
-            return BadRequest(new { message = "ID в пути и теле запроса не совпадают." });
+            var categories = await _categoryRepository.GetAllCategoriesAsync();
+            return Ok(categories); // Возможно, вам нужно будет преобразовать к DTO
         }
 
-        if (!ModelState.IsValid)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductCategoryDto>> GetCategoryById(int id)
         {
-            return BadRequest(ModelState);
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null) return NotFound();
+            return Ok(ConvertToDto(category)); // Добавить метод ConvertToDto
         }
 
-        _context.Entry(category).State = EntityState.Modified;
-
-        try
+        private ProductCategory ConvertToModel(ProductCategoryDto dto)
         {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_context.ProductCategories.Any(e => e.Id == id))
+            return new ProductCategory
             {
-                return NotFound(new { message = $"Категория с ID = {id} не найдена." });
-            }
-            throw;
+                Id = dto.Id,
+                Name = dto.Name,
+            };
         }
 
-        return NoContent();
-    }
-
-    // DELETE: api/ProductCategories/id
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteProductCategory(int id)
-    {
-        var category = await _context.ProductCategories.FindAsync(id);
-        if (category == null)
+        private ProductCategoryDto ConvertToDto(ProductCategory category)
         {
-            return NotFound(new { message = $"Категория с ID = {id} не найдена." });
+            return new ProductCategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+            };
         }
-
-        _context.ProductCategories.Remove(category);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
     }
 }
+
+

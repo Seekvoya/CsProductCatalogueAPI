@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using CsProductCatalogueAPI.Models; 
 
-public class ApplicationDbContext : DbContext
+namespace CsProductCatalogueAPI.Data 
 {
-    public DbSet<Product> Products { get; set; }
-    public DbSet<ProductCategory> ProductCategories { get; set; }
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
+    public class ApplicationDbContext : DbContext
     {
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
     }
 }
+
