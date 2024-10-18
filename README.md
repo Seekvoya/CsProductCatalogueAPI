@@ -44,16 +44,24 @@ dotnet run
 
 Категория товара (ProductCategory)
 GET /api/productcategories: Получить все категории товаров.
+
 GET /api/productcategories/{id}: Получить категорию по id.
+
 POST /api/productcategories: Создать новую категорию.
+
 PUT /api/productcategories/{id}: Обновить существующую категорию.
+
 DELETE /api/productcategories/{id}: Удалить категорию по id.
 
 Товар (Product)
 GET /api/products: Получить все товары.
+
 GET /api/products/{id}: Получить товар по id.
+
 POST /api/products: Создать новый товар.
+
 PUT /api/products/{id}: Обновить существующий товар.
+
 DELETE /api/products/{id}: Удалить товар по id.
 
 
