@@ -1,4 +1,3 @@
-// Controllers/ProductCategoriesController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

@@ -6,7 +6,7 @@ public class Product
 
     [Required(ErrorMessage = "Name is required")]
     [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
-    public required string Name { get; set; } // Модификатор required
+    public required string Name { get; set; }
 
     [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
     public string? Description { get; set; }
@@ -17,6 +17,6 @@ public class Product
 
     [Required(ErrorMessage = "CategoryId is required")]
     public int CategoryId { get; set; }
-    
-    public required ProductCategory Category { get; set; } // Модификатор required
+
+    public ProductCategory? Category { get; set; }
 }
