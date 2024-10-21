@@ -43,17 +43,19 @@ dotnet run
 ## API Документация
 
 Категория товара (ProductCategory)
-GET /api/product_categories: Получить все категории товаров.
+GET /api/productcategories: Получить все категории товаров.
 
-GET /api/product_categories/{id}: Получить категорию по id.
+GET /api/productcategories/{id}: Получить категорию по id.
 
-POST /api/product_categories: Создать новую категорию.
+POST /api/productcategories: Создать новую категорию.
 
-PUT /api/product_categories/{id}: Обновить существующую категорию.
+PUT /api/productcategories/{id}: Обновить существующую категорию.
 
-DELETE /api/product_categories/{id}: Удалить категорию по id.
+DELETE /api/productcategories/{id}: Удалить категорию по id.
+
 
 Товар (Product)
+
 GET /api/products: Получить все товары.
 
 GET /api/products/{id}: Получить товар по id.

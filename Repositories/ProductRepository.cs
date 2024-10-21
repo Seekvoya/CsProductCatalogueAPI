@@ -21,6 +21,11 @@ namespace CsProductCatalogueAPI.Repositories
             return await _context.Products.ToListAsync();
         }
 
+        public async Task<bool> CategoryExistsAsync(int categoryId)
+        {
+            return await _context.ProductCategories.AnyAsync(c => c.Id == categoryId);
+        }
+
         public async Task<Product> GetProductByIdAsync(int id)
         {
             return await _context.Products.FindAsync(id);
