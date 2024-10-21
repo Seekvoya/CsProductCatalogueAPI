@@ -15,7 +15,6 @@ namespace CsProductCatalogueAPI.Repositories
             _context = context;
         }
 
-        // Реализация методов интерфейса
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             return await _context.Products.ToListAsync();

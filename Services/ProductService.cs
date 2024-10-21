@@ -1,4 +1,3 @@
-// Services/ProductService.cs
 using CsProductCatalogueAPI.DTOs;
 using CsProductCatalogueAPI.Models;
 using CsProductCatalogueAPI.Repositories;
@@ -68,7 +67,7 @@ namespace CsProductCatalogueAPI.Services
             };
         }
 
-        public async Task<ProductDto> UpdateProductAsync(int id, ProductDto productDto) // Обратите внимание на возвращаемый тип
+        public async Task<ProductDto> UpdateProductAsync(int id, ProductDto productDto)
         {
             var product = new Product
             {
@@ -80,7 +79,7 @@ namespace CsProductCatalogueAPI.Services
             };
 
             var updatedProduct = await _productRepository.UpdateProductAsync(product);
-            return new ProductDto // Убедитесь, что вы возвращаете ProductDto
+            return new ProductDto 
             {
                 Id = updatedProduct.Id,
                 Name = updatedProduct.Name,

@@ -6,16 +6,15 @@ using CsProductCatalogueAPI.Data;
 
 namespace CsProductCatalogueAPI.Repositories
 {
-    public class ProductCategoryRepository : IProductCategoryRepository // Исправлено имя класса
+    public class ProductCategoryRepository : IProductCategoryRepository 
     {
         private readonly ApplicationDbContext _context;
 
-        public ProductCategoryRepository(ApplicationDbContext context) // Исправлено имя класса
+        public ProductCategoryRepository(ApplicationDbContext context) 
         {
             _context = context;
         }
 
-        // Реализация методов интерфейса
         public async Task<IEnumerable<ProductCategory>> GetAllCategoriesAsync()
         {
             return await _context.ProductCategories.ToListAsync();
@@ -28,7 +27,7 @@ namespace CsProductCatalogueAPI.Repositories
 
         public async Task<ProductCategory> AddCategoryAsync(ProductCategory category)
         {
-            await _context.ProductCategories.AddAsync(category); // Исправлено имя DbSet
+            await _context.ProductCategories.AddAsync(category); 
             await _context.SaveChangesAsync();
             return category;
         }
