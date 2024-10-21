@@ -1,6 +1,5 @@
 using CsProductCatalogueAPI.DTOs;
-using CsProductCatalogueAPI.Models;
-using CsProductCatalogueAPI.Repositories;
+using CsProductCatalogueAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,78 +10,64 @@ namespace CsProductCatalogueAPI.Controllers
     [Route("api/product_categories")]
     public class ProductCategoriesController : ControllerBase
     {
-        private readonly IProductCategoryRepository _categoryRepository;
+        private readonly IProductCategoryService _categoryService;
 
-        public ProductCategoriesController(IProductCategoryRepository categoryRepository)
+        public ProductCategoriesController(IProductCategoryService categoryService)
         {
-            _categoryRepository = categoryRepository;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddCategory(ProductCategoryDto categoryDto)
-        {
-            var category = ConvertToModel(categoryDto);
-            await _categoryRepository.AddCategoryAsync(category);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, ConvertToDto(category));
+            _categoryService = categoryService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductCategoryDto>>> GetAllCategories()
+        public async Task<ActionResult<IEnumerable<ProductCategoryDto>>> GetCategories()
         {
-            var categories = await _categoryRepository.GetAllCategoriesAsync();
-            var categoryDtos = categories.Select(ConvertToDto);
-            return Ok(categoryDtos);
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return Ok(categories);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductCategoryDto>> GetCategoryById(int id)
+        public async Task<ActionResult<ProductCategoryDto>> GetCategory(int id)
         {
-            var category = await _categoryRepository.GetCategoryByIdAsync(id);
-            if (category == null) return NotFound();
-            return Ok(ConvertToDto(category));
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return Ok(category);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ProductCategoryDto>> CreateCategory(ProductCategoryDto categoryDto)
+        {
+            var createdCategory = await _categoryService.CreateCategoryAsync(categoryDto);
+            return CreatedAtAction(nameof(GetCategory), new { id = createdCategory.Id }, createdCategory);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, ProductCategoryDto categoryDto)
         {
-            var existingCategory = await _categoryRepository.GetCategoryByIdAsync(id);
-            if (existingCategory == null) return NotFound($"Category with ID {id} does not exist.");
-
-            existingCategory.Name = categoryDto.Name;
-
-            await _categoryRepository.UpdateCategoryAsync(existingCategory);
-            return Ok(ConvertToDto(existingCategory)); 
+            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, categoryDto);
+            if (updatedCategory == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var existingCategory = await _categoryRepository.GetCategoryByIdAsync(id);
-            if (existingCategory == null) return NotFound($"Category with ID {id} does not exist.");
-
-            await _categoryRepository.DeleteCategoryAsync(id);
-            return NoContent(); // Возврат статуса 204 No Content после успешного удаления
-        }
-
-        private ProductCategory ConvertToModel(ProductCategoryDto dto)
-        {
-            return new ProductCategory
+            var success = await _categoryService.DeleteCategoryAsync(id);
+            if (!success)
             {
-                Id = dto.Id,
-                Name = dto.Name,
-            };
-        }
-
-        private ProductCategoryDto ConvertToDto(ProductCategory category)
-        {
-            return new ProductCategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-            };
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }
+
+
+
 
 
 

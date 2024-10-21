@@ -14,8 +14,9 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 
 // Регистрация сервисов
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<ProductCategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+
 
 // Настройка контроллеров и Swagger
 builder.Services.AddControllers();

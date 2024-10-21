@@ -1,109 +1,62 @@
 using CsProductCatalogueAPI.DTOs;
-using CsProductCatalogueAPI.Models;
-using CsProductCatalogueAPI.Repositories;
+using CsProductCatalogueAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CsProductCatalogueAPI.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductService _productService;
 
-        public ProductsController(IProductRepository productRepository)
+        public ProductsController(IProductService productService)
         {
-            _productRepository = productRepository;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddProduct(ProductDto productDto)
-        {
-            if (productDto.CategoryId > 0 &&
-                !await _productRepository.CategoryExistsAsync(productDto.CategoryId))
-            {
-                return BadRequest($"Category with ID {productDto.CategoryId} does not exist.");
-            }
-
-            var product = ConvertToModel(productDto);
-            await _productRepository.AddProductAsync(product);
-            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, ConvertToDto(product));
+            _productService = productService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
-            var products = await _productRepository.GetAllProductsAsync();
-            var productDtos = products.Select(ConvertToDto).ToList();
-            return Ok(productDtos);
+            var products = await _productService.GetAllProductsAsync();
+            return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProductById(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
-            var product = await _productRepository.GetProductByIdAsync(id);
-            if (product == null) 
-                return NotFound();
-                
-            return Ok(ConvertToDto(product));
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ProductDto>> AddProductAsync([FromBody] ProductDto productDto)
+        {
+            var createdProduct = await _productService.CreateProductAsync(productDto);
+            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
-            var existingProduct = await _productRepository.GetProductByIdAsync(id);
-            if (existingProduct == null)
-                return NotFound($"Product with ID {id} does not exist.");
-
-          if (productDto.CategoryId > 0 && !await _productRepository.CategoryExistsAsync(productDto.CategoryId))
-                return BadRequest($"Category with ID {productDto.CategoryId} does not exist.");
-
-            existingProduct.Name = productDto.Name;
-            existingProduct.Description = productDto.Description; 
-            existingProduct.Price = productDto.Price;
-            existingProduct.CategoryId = productDto.CategoryId;
-
-            await _productRepository.UpdateProductAsync(existingProduct);
-            return Ok(ConvertToDto(existingProduct));
+            var updatedProduct = await _productService.UpdateProductAsync(id, productDto);
+            if (updatedProduct == null) return NotFound();
+            return Ok(updatedProduct);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(int id)
         {
-            var existingProduct = await _productRepository.GetProductByIdAsync(id);
-            if (existingProduct == null) return NotFound($"Product with ID {id} does not exist.");
-
-            await _productRepository.DeleteProductAsync(id);
-            
-            // Возврат статуса 204 No Content после успешного удаления
+            var success = await _productService.DeleteProductAsync(id);
+            if (!success) return NotFound();
             return NoContent();
-        }
-
-        private Product ConvertToModel(ProductDto dto)
-        {
-            return new Product
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                Price = dto.Price,
-                CategoryId = dto.CategoryId
-            };
-        }
-
-        private ProductDto ConvertToDto(Product product)
-        {
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                CategoryId = product.CategoryId
-            };
         }
     }
 }
+
+
 
 

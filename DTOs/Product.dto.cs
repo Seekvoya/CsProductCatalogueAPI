@@ -19,6 +19,6 @@ namespace CsProductCatalogueAPI.DTOs
 
         [Required(ErrorMessage = "CategoryId is required")]
         public int CategoryId { get; set; }
-
     }
 }
+
