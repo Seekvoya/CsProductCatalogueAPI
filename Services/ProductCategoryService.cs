@@ -31,6 +31,11 @@ namespace CsProductCatalogueAPI.Services
             return categoryDtos;
         }
 
+        public async Task<IEnumerable<CategoryStatisticsDto>> GetCategoryStatisticsAsync(int page, int pageSize)
+        {
+            return await _categoryRepository.GetCategoryStatisticsAsync(page, pageSize);
+        }
+
         public async Task<ProductCategoryDto> GetCategoryByIdAsync(int id)
         {
             var category = await _categoryRepository.GetCategoryByIdAsync(id);

@@ -3,6 +3,7 @@ using CsProductCatalogueAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace CsProductCatalogueAPI.Controllers
 {
@@ -23,6 +24,21 @@ namespace CsProductCatalogueAPI.Controllers
             var categories = await _categoryService.GetAllCategoriesAsync();
             return Ok(categories);
         }
+
+        [HttpGet("statistics")]
+        public async Task<ActionResult<IEnumerable<CategoryStatisticsDto>>> GetCategoryStatistics(
+           int page = 1,
+           int pageSize = 10)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest("Page and PageSize must be positive integers.");
+            }
+
+            var statistics = await _categoryService.GetCategoryStatisticsAsync(page, pageSize);
+            return Ok(statistics);
+        }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductCategoryDto>> GetCategory(int id)

@@ -11,5 +11,6 @@ namespace CsProductCatalogueAPI.Services
         Task<ProductCategoryDto> CreateCategoryAsync(ProductCategoryDto categoryDto);
         Task<ProductCategoryDto> UpdateCategoryAsync(int id, ProductCategoryDto categoryDto);
         Task<bool> DeleteCategoryAsync(int id);
+        Task<IEnumerable<CategoryStatisticsDto>> GetCategoryStatisticsAsync(int page, int pageSize);
     }
 }
